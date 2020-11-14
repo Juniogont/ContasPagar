@@ -87,18 +87,21 @@ namespace TesteContasPagar.Controllers
                 TimeSpan date = Convert.ToDateTime(contaPagar.DataPagamento) - Convert.ToDateTime(contaPagar.DataVencimento);
                 int diasAtraso = date.Days;
 
-                if(diasAtraso > 0)
+                if (diasAtraso > 0)
                 {
                     contaPagar.DiasAtraso = diasAtraso;
                     var regraAtraso = _context.RegraAtraso.OrderByDescending(x => x.DiasAtraso).FirstOrDefault(x => x.DiasAtraso <= diasAtraso);
-                    if(regraAtraso != null)
+                    if (regraAtraso != null)
                     {
                         contaPagar.RegraAtrasoId = regraAtraso.Id;
                         contaPagar.ValorCorrigido = contaPagar.ValorOriginal + (contaPagar.ValorOriginal / 100 * regraAtraso.Multa) + (contaPagar.ValorOriginal / 100 * (regraAtraso.JurosDia * diasAtraso));
                     }
                 }
                 else
+                {
                     contaPagar.DiasAtraso = 0;
+                    contaPagar.ValorCorrigido = contaPagar.ValorOriginal;
+                }
                 _context.ContaPagar.Add(contaPagar);
                 await _context.SaveChangesAsync();
 
